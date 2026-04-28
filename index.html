@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FairLens — AI Bias Detection</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Azeret+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────── -->
+  <header>
+    <div class="logo">Fair<span class="logo-dot">.</span>Lens</div>
+    <div class="header-badge">Solution Challenge 2026</div>
+    <div class="gemini-tag">
+      <span class="gemini-dot"></span>
+      GEMINI 2.5 FLASH
+    </div>
+  </header>
+
+  <!-- ── HERO ──────────────────────────────── -->
+  <div class="hero">
+    <div class="hero-kicker">Unbiased AI Decision Track</div>
+    <h1>
+      AI decides your<br>
+      <em>job, loan, healthcare.</em><br>
+      Is it fair?
+    </h1>
+    <p class="hero-sub">
+      FairLens inspects any dataset for hidden discrimination before an automated
+      system makes a life-changing decision about a real person.
+      Powered by Gemini. No code required.
+    </p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num">3s</div>
+        <div class="stat-label">To audit</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Code needed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Domains</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Privacy safe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN LAYOUT ────────────────────────── -->
+  <div class="layout">
+
+    <!-- LEFT: INPUT PANEL -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <span class="step-badge">01</span>
+          <span class="card-title">Configure your analysis</span>
+        </div>
+
+        <!-- API KEY -->
+        <div class="api-section">
+          <div class="field-label">🔑 Gemini API Key</div>
+          <div class="api-row">
+            <input
+              type="password"
+              class="api-input"
+              id="apiKey"
+              placeholder="Paste your Gemini API key here…"
+            />
+            <button class="api-save-btn" onclick="saveKey()">Save</button>
+          </div>
+          <div class="api-status" id="apiStatus">
+            Get your free key at aistudio.google.com → Get API Key
+          </div>
+        </div>
+
+        <!-- DOMAIN SELECTOR -->
+        <div class="domain-section">
+          <div class="field-label">Domain context</div>
+          <div class="domain-grid">
+            <button class="domain-btn active" onclick="setDomain(this,'hiring')" data-domain="hiring">
+              <span class="domain-icon">💼</span>
+              <span class="domain-name">Hiring</span>
+            </button>
+            <button class="domain-btn" onclick="setDomain(this,'loan')" data-domain="loan">
+              <span class="domain-icon">🏦</span>
+              <span class="domain-name">Loan</span>
+            </button>
+            <button class="domain-btn" onclick="setDomain(this,'medical')" data-domain="medical">
+              <span class="domain-icon">🏥</span>
+              <span class="domain-name">Medical</span>
+            </button>
+            <button class="domain-btn" onclick="setDomain(this,'education')" data-domain="education">
+              <span class="domain-icon">🎓</span>
+              <span class="domain-name">Education</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SAMPLE DATASETS -->
+        <div class="samples-section">
+          <div class="field-label">Try a sample dataset</div>
+          <div class="sample-pills">
+            <button class="sample-pill active" id="pill-hiring"  onclick="loadSample('hiring')">💼 Biased hiring</button>
+            <button class="sample-pill"         id="pill-loan"    onclick="loadSample('loan')">🏦 Loan approvals</button>
+            <button class="sample-pill"         id="pill-medical" onclick="loadSample('medical')">🏥 Medical triage</button>
+            <button class="sample-pill"         id="pill-clean"   onclick="loadSample('clean')">✅ Fair dataset</button>
+          </div>
+        </div>
+
+        <!-- DATA INPUT -->
+        <div class="textarea-section">
+          <div class="textarea-top">
+            <div class="field-label" style="margin:0;">Dataset (CSV or text summary)</div>
+            <span class="char-count" id="charCount">0 chars</span>
+          </div>
+          <textarea
+            class="data-textarea"
+            id="dataInput"
+            placeholder="Paste your CSV here, or click a sample above…"
+            oninput="onInputChange()"
+          ></textarea>
+        </div>
+
+        <!-- ANALYSE BUTTON -->
+        <div class="analyse-wrap">
+          <button class="analyse-btn" id="analyseBtn" onclick="runAnalysis()" disabled>
+            <span id="btnLabel">Select a sample or paste data</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+      </div><!-- /card -->
+    </div><!-- /left col -->
+
+    <!-- RIGHT: RESULTS PANEL -->
+    <div class="results-panel">
+      <div class="card" style="min-height: 400px;">
+        <div class="card-header">
+          <span class="step-badge">02</span>
+          <span class="card-title">Bias report</span>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-illustration">◎</div>
+          <div class="empty-title">No report yet</div>
+          <div class="empty-text">
+            Select a sample or paste your CSV.<br>
+            Gemini will scan for bias and explain<br>
+            every finding in plain language.
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="loading-state" id="loadingState">
+          <div class="loading-header">
+            <div class="loading-spinner"></div>
+            <div>
+              <div class="loading-title">Gemini is analyzing…</div>
+              <div class="loading-sub">Your data stays on your device</div>
+            </div>
+          </div>
+          <div class="loading-track"><div class="loading-fill"></div></div>
+          <div class="loading-steps" id="loadingSteps"></div>
+        </div>
+
+        <!-- Error state -->
+        <div class="error-box" id="errorBox">
+          <div class="error-title">Analysis failed</div>
+          <div class="error-msg"  id="errorMsg"></div>
+          <div class="error-hint" id="errorHint"></div>
+        </div>
+
+        <!-- Report -->
+        <div class="report" id="report">
+
+          <!-- Score ring -->
+          <div class="score-hero">
+            <div class="score-ring-wrap">
+              <svg viewBox="0 0 130 130">
+                <circle class="score-ring-bg"   cx="65" cy="65" r="54" fill="none" stroke-width="8"/>
+                <circle class="score-ring-fill" id="scoreArc" cx="65" cy="65" r="54" fill="none" stroke-width="8"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-num"   id="scoreNum">—</div>
+                <div class="score-denom">/ 100</div>
+              </div>
+            </div>
+            <div class="score-verdict" id="scoreVerdict">—</div>
+            <div class="score-sub"     id="scoreSub">Bias severity score</div>
+          </div>
+
+          <!-- Findings list -->
+          <div class="findings-section">
+            <div class="section-label">Findings</div>
+            <div id="findingsList"></div>
+          </div>
+
+          <!-- Summary -->
+          <div class="summary-section">
+            <div class="section-label">Summary</div>
+            <div class="summary-text" id="summaryText"></div>
+            <div class="summary-note">
+              ⚠ AI-assisted analysis. A qualified human should validate
+              all findings before any organizational action is taken.
+            </div>
+          </div>
+
+          <!-- Data quality flags -->
+          <div class="dq-section" id="dqSection" style="display:none;">
+            <div class="dq-box">
+              <span>⚠</span>
+              <span id="dqText"></span>
+            </div>
+          </div>
+
+        </div><!-- /report -->
+      </div><!-- /card -->
+    </div><!-- /results-panel -->
+
+  </div><!-- /layout -->
+
+  <!-- ── HOW IT WORKS ───────────────────────── -->
+  <div class="how-section">
+    <div class="how-label">How it works</div>
+    <div class="how-title">From data to fairness report in seconds</div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-step-title">Paste your dataset</div>
+        <div class="how-step-desc">Upload any CSV — hiring, loans, medical triage, or scholarship data. No formatting required.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-step-title">Gemini detects bias</div>
+        <div class="how-step-desc">Gemini 2.5 Flash computes outcome rates across demographic groups and flags disparities above 10%.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-step-title">Plain-language report</div>
+        <div class="how-step-desc">Every finding explained in one sentence. No jargon. Any manager can understand and act on it.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <div class="how-step-title">Actionable fixes</div>
+        <div class="how-step-desc">Specific corrective steps for each bias found — not generic advice. Audit-ready for compliance teams.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────── -->
+  <footer>
+    <div class="footer-logo">Fair<span style="color:var(--red)">.</span>Lens</div>
+    <div class="footer-meta">SOLUTION CHALLENGE 2026 · UNBIASED AI DECISION · GEMINI 2.5 FLASH</div>
+  </footer>
+
+  <!-- ── SCRIPTS ────────────────────────────── -->
+  <!-- Load order matters: config → samples → prompt → app -->
+  <script src="config.js"></script>
+  <script src="js/samples.js"></script>
+  <script src="js/prompt.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
